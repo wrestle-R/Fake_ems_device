@@ -1,0 +1,7 @@
+name = "ems-data-sender"
+main = "ems-worker.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables (if needed)
+# [vars]
+# API_URL = "https://technode.co.in/TECHNODE_IOT/apis/ems_api.php"

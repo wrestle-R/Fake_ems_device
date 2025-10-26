@@ -1,0 +1,20 @@
+{
+  "name": "ems-data-sender",
+  "version": "1.0.0",
+  "description": "Historical data sender for EMS devices",
+  "main": "ems-data-sender.js",
+  "scripts": {
+    "start": "node ems-data-sender.js",
+    "test": "node ems-data-sender.js"
+  },
+  "keywords": [
+    "ems",
+    "data-sender",
+    "iot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
