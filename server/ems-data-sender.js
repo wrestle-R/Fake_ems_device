@@ -6,7 +6,7 @@ const DEVICE_ID = 'TN-862360078628612';
 const LOCATION = 'TECHNODE OFFICE';
 
 // Time range: Oct 20, 2025 00:00 to Oct 26, 2025 23:59
-const START_DATE = new Date('2025-10-20T00:00:00');
+const START_DATE = new Date('2025-10-01T00:00:00');
 const END_DATE = new Date('2025-10-26T23:59:00');
 const INTERVAL_MINUTES = 2; // Send data every 2 minutes
 
