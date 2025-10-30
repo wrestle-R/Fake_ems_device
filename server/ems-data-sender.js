@@ -1,13 +1,20 @@
 const axios = require('axios');
+const readline = require('readline');
+
+// API Endpoints Configuration
+const ENDPOINTS = {
+  LOCAL: 'http://localhost/Intership-admin-dashboard/apis/ems_api.php',
+  PRODUCTION: 'https://technode.co.in/TECHNODE_IOT/apis/ems_api.php'
+};
 
 // Configuration
-const API_URL = 'https://technode.co.in/TECHNODE_IOT/apis/ems_api.php';
+let API_URL = ''; // Will be set based on user choice
 const DEVICE_ID = 'TN-862360078628612';
 const LOCATION = 'TECHNODE OFFICE';
 
 // Time range: Oct 20, 2025 00:00 to Oct 26, 2025 23:59
-const START_DATE = new Date('2025-10-01T00:00:00');
-const END_DATE = new Date('2025-10-26T23:59:00');
+const START_DATE = new Date('2025-10-26T00:00:00');
+const END_DATE = new Date('2025-10-30T23:59:00');
 const INTERVAL_MINUTES = 2; // Send data every 2 minutes
 
 // Realistic value generators with daily variation patterns
@@ -219,11 +226,58 @@ async function sendData(timestamp, generator) {
   }
 }
 
+// Function to prompt user for environment choice
+function promptEnvironment() {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    console.log('\n' + '='.repeat(70));
+    console.log('🚀 EMS DATA SENDER - ENVIRONMENT SELECTION');
+    console.log('='.repeat(70));
+    console.log('\nPlease select the target environment:\n');
+    console.log('  1️⃣  LOCAL    - http://localhost/Intership-admin-dashboard/apis/');
+    console.log('  2️⃣  PRODUCTION - https://technode.co.in/TECHNODE_IOT/apis/');
+    console.log('\n' + '='.repeat(70));
+
+    const askQuestion = () => {
+      rl.question('\nEnter your choice (1 or 2): ', (answer) => {
+        const choice = answer.trim();
+        
+        if (choice === '1') {
+          API_URL = ENDPOINTS.LOCAL;
+          console.log('\n✅ Selected: LOCAL environment');
+          console.log(`📍 Endpoint: ${API_URL}\n`);
+          rl.close();
+          resolve('local');
+        } else if (choice === '2') {
+          API_URL = ENDPOINTS.PRODUCTION;
+          console.log('\n✅ Selected: PRODUCTION environment');
+          console.log(`📍 Endpoint: ${API_URL}\n`);
+          rl.close();
+          resolve('production');
+        } else {
+          console.log('❌ Invalid choice. Please enter 1 or 2.');
+          askQuestion();
+        }
+      });
+    };
+
+    askQuestion();
+  });
+}
+
 // Main execution
 async function main() {
+  // First, let user choose environment
+  await promptEnvironment();
+  
   console.log('='.repeat(70));
   console.log('EMS Data Sender - Historical Data Population');
   console.log('='.repeat(70));
+  console.log(`API Endpoint: ${API_URL}`);
   console.log(`Device ID: ${DEVICE_ID}`);
   console.log(`Time Range: ${START_DATE.toISOString()} to ${END_DATE.toISOString()}`);
   console.log(`Interval: Every ${INTERVAL_MINUTES} minutes`);
