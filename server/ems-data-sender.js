@@ -13,8 +13,8 @@ const DEVICE_ID = 'TN-862360078628612';
 const LOCATION = 'TECHNODE OFFICE';
 
 // Time range: Oct 20, 2025 00:00 to Oct 26, 2025 23:59
-const START_DATE = new Date('2025-10-26T00:00:00');
-const END_DATE = new Date('2025-10-30T23:59:00');
+const START_DATE = new Date('2025-10-31T19:15:00');
+const END_DATE = new Date('2025-11-01T09:30:00');
 const INTERVAL_MINUTES = 2; // Send data every 2 minutes
 
 // Realistic value generators with daily variation patterns
@@ -187,7 +187,9 @@ function generateTimestamps() {
 
 // Format timestamp for API
 function formatTimestamp(date) {
-  return date.toISOString().slice(0, 19); // Format: 2025-10-20T12:30:00
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in ms
+  const istTime = new Date(date.getTime() + istOffset);
+  return istTime.toISOString().slice(0, 19);
 }
 
 // Send data to API
