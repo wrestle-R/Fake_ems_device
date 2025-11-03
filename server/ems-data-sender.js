@@ -1,6 +1,9 @@
 const axios = require('axios');
 const readline = require('readline');
 
+// IST offset constant (UTC+5:30)
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
 // API Endpoints Configuration
 const ENDPOINTS = {
   LOCAL: 'http://localhost/Intership-admin-dashboard/apis/ems_api.php',
@@ -12,10 +15,21 @@ let API_URL = ''; // Will be set based on user choice
 const DEVICE_ID = 'TN-862360078628612';
 const LOCATION = 'TECHNODE OFFICE';
 
-// Time range: Oct 20, 2025 00:00 to Oct 26, 2025 23:59
-const START_DATE = new Date('2025-10-31T19:15:00');
-const END_DATE = new Date('2025-11-01T09:30:00');
-const INTERVAL_MINUTES = 2; // Send data every 2 minutes
+// Helper: parse an ISO "YYYY-MM-DDTHH:mm:ss" string as IST (no timezone included)
+function parseIST(isoLocal) {
+  const [datePart, timePart] = isoLocal.split('T');
+  const [y, m, d] = datePart.split('-').map(Number);
+  const [hh, mm, ss] = timePart.split(':').map(Number);
+  // Create a Date representing that IST local time:
+  // Date.UTC(...) creates ms for same clock values as if they were UTC,
+  // subtracting IST offset produces the correct UTC ms for that IST moment.
+  return new Date(Date.UTC(y, m - 1, d, hh, mm, ss) - IST_OFFSET_MS);
+}
+
+// Time range interpreted as IST
+const START_DATE = parseIST('2025-11-03T12:30:00');
+const END_DATE = parseIST('2025-11-03T19:40:00');
+const INTERVAL_MINUTES = 1; // Send data every 1 minute
 
 // Realistic value generators with daily variation patterns
 class ValueGenerator {
@@ -185,10 +199,9 @@ function generateTimestamps() {
   return timestamps;
 }
 
-// Format timestamp for API
+// Format timestamp for API (returns IST local time without timezone suffix)
 function formatTimestamp(date) {
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in ms
-  const istTime = new Date(date.getTime() + istOffset);
+  const istTime = new Date(date.getTime() + IST_OFFSET_MS);
   return istTime.toISOString().slice(0, 19);
 }
 
@@ -281,7 +294,7 @@ async function main() {
   console.log('='.repeat(70));
   console.log(`API Endpoint: ${API_URL}`);
   console.log(`Device ID: ${DEVICE_ID}`);
-  console.log(`Time Range: ${START_DATE.toISOString()} to ${END_DATE.toISOString()}`);
+  console.log(`Time Range (IST): ${formatTimestamp(START_DATE)} to ${formatTimestamp(END_DATE)}`);
   console.log(`Interval: Every ${INTERVAL_MINUTES} minutes`);
   console.log('='.repeat(70));
   
