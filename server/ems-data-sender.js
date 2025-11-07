@@ -4,6 +4,9 @@ const readline = require('readline');
 // IST offset constant (UTC+5:30)
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 
+// Increase all numeric values by 50%
+const VALUE_FACTOR = 1.5;
+
 // API Endpoints Configuration
 const ENDPOINTS = {
   LOCAL: 'http://localhost/Intership-admin-dashboard/apis/ems_api.php',
@@ -27,9 +30,9 @@ function parseIST(isoLocal) {
 }
 
 // Time range interpreted as IST
-const START_DATE = parseIST('2025-11-03T12:30:00');
-const END_DATE = parseIST('2025-11-03T19:40:00');
-const INTERVAL_MINUTES = 1; // Send data every 1 minute
+const START_DATE = parseIST('2025-11-03T22:05:00');
+const END_DATE = parseIST('2025-11-08T02:05:00');
+const INTERVAL_MINUTES = 0.5; // Send data every 1 minute
 
 // Realistic value generators with daily variation patterns
 class ValueGenerator {
@@ -205,6 +208,29 @@ function formatTimestamp(date) {
   return istTime.toISOString().slice(0, 19);
 }
 
+// Helper: recursively scale numeric values in an object/array
+function scaleNumeric(obj, factor) {
+  if (obj === null || obj === undefined) return;
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      if (typeof obj[i] === 'number') {
+        obj[i] = Number.isInteger(obj[i]) ? Math.round(obj[i] * factor) : parseFloat((obj[i] * factor).toFixed(2));
+      } else if (typeof obj[i] === 'object') {
+        scaleNumeric(obj[i], factor);
+      }
+    }
+  } else if (typeof obj === 'object') {
+    for (const key of Object.keys(obj)) {
+      const val = obj[key];
+      if (typeof val === 'number') {
+        obj[key] = Number.isInteger(val) ? Math.round(val * factor) : parseFloat((val * factor).toFixed(2));
+      } else if (typeof val === 'object') {
+        scaleNumeric(val, factor);
+      }
+    }
+  }
+}
+
 // Send data to API
 async function sendData(timestamp, generator) {
   const payload = {
@@ -219,6 +245,9 @@ async function sendData(timestamp, generator) {
     TS: formatTimestamp(timestamp),
     DT: "EMS"
   };
+
+  // Scale all numeric values by the specified factor (50% increase)
+  scaleNumeric(payload, VALUE_FACTOR);
 
   try {
     const response = await axios.post(API_URL, payload, {
